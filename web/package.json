@@ -1,0 +1,30 @@
+{
+  "name": "trustcoin-keepkey-web",
+  "version": "0.0.1",
+  "description": "Facebook Posting UI.",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.4.3",
+    "express": "^4.4.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/therealplato/trustcoin-keepkey.git"
+  },
+  "keywords": [
+    "react",
+    "keepkey",
+    "consensus 2015",
+    "demo",
+    "hackathon"
+  ],
+  "author": "eshon",
+  "engines" : {
+    "node" : "0.12.x"
+  }
+}
