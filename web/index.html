@@ -10,47 +10,94 @@
   </head>
   <body>
     <div id="login"></div>
+
     <div id="status">Trying to connect</div>
     <script type="text/jsx">
       var FacebookPost = React.createClass({
         getInitialState: function() {
-          return { showLogin: false };
+          return { showLogin: true };
         },
 
         componentDidMount: function() {
-        window.fbAsyncInit = function() {
-          FB.init({
-            appId      : '777858092360003',
-            cookie     : true,  // enable cookies - allow access to session
-            xfbml      : true,  // parse social plugins on this page
-            version    : 'v2.4' 
-          });
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId      : '777899629022516',
+              xfbml      : true,  // parse social plugins on this page
+              version    : 'v2.4' 
+            });
 
-          FB.getLoginStatus(function(response) {
-            this.statusChangeCallback(response);
-              }.bind(this));
-            }.bind(this);
+            FB.getLoginStatus(function(response) {
+              this.statusChangeCallback(response);
+                }.bind(this));
+              }.bind(this);
 
             // Load the SDK asynchronously
-            (function(d, s, id) {
-              var js, fjs = d.getElementsByTagName(s)[0];
-              if (d.getElementById(id)) return;
-              js = d.createElement(s); js.id = id;
-              js.src = "//connect.facebook.net/en_US/sdk/debug.js";
-              fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
+            (function(d, s, id){
+               var js, fjs = d.getElementsByTagName(s)[0];
+               if (d.getElementById(id)) {return;}
+               js = d.createElement(s); js.id = id;
+               js.src = "//connect.facebook.net/en_US/sdk.js";
+               fjs.parentNode.insertBefore(js, fjs);
+             }(document, 'script', 'facebook-jssdk'));
           },
 
           testAPI: function() {
             var self = this;
-            console.log('Welcome!  Fetching your information.... ');
-            FB.api('/me', function(response) {
-            console.log('Successful login for: ' + response.name);
-            console.log(response);
-            self.setState({ showLogin: false });
-            document.getElementById('status').innerHTML =
-              'Thanks for logging in, ' + response.name + '!';
+            console.log('Welcome! Fetching your information.... ');
+            FB.api(
+              '/me', 
+              function(response) {
+                if (response && !response.error) {
+                  console.log('Successful login for: ' + response.name);
+                  document.getElementById('status').innerHTML =
+                    'Thanks for logging in, ' + response.name + '!';
+                } else {
+                  document.getElementById('status').innerHTML = 
+                    'Error logging in!';
+                  console.log('Error logging in');
+                  console.log(response);
+                }
             });
+          },
+
+          getFivePosts: function() {
+            FB.api(
+              '/me/feed?limit=5', 
+              {fields: 'posts'}, 
+              function(response) {
+                if (response && !response.error) {
+                  console.log(response);
+                  for (var i=0; i<response.data.length; i++) { 
+                     console.log(i + " : " + response.data[i].message);
+                  }
+                } else {
+                  document.getElementById('status').innerHTML = 
+                    'Error fetching posts.';
+                  console.log('Error fetching posts');
+                  console.log(response.error);
+                }
+            });
+          },
+
+          postMessage: function() {
+            console.log("Posting 'I vouch for Jorge!'");
+            var v4m_msg = "I vouch for Jorge!";
+            FB.api(
+              '/me/feed', 
+              'post',
+              { message: v4m_msg,
+                name: 'Vouch 4 me'
+              },
+              function(data) {
+                console.log("post data");
+                console.log(data);
+              }
+            );
+          },
+
+          setAsLoggedIn: function() {
+            this.setState({ showLogin: false });
+            document.getElementById('status').innerHTML = 'Logged in.';
           },
 
           // This is called with the results from from FB.getLoginStatus().
@@ -63,7 +110,10 @@
             // for FB.getLoginStatus().
             if (response.status === 'connected') {
               // Logged into your app and Facebook.
-              this.testAPI();
+              //this.testAPI();
+              this.setAsLoggedIn();
+
+              this.getFivePosts();
               
             } else if (response.status === 'not_authorized') {
               // The person is logged into Facebook, but not your app.
@@ -78,22 +128,23 @@
           },
 
           checkLoginState: function() {
+            console.log("checkLoginState");
+            var self = this;
             FB.getLoginStatus(function(response) {
-              this.statusChangeCallback(response);
-            }.bind(this));
-          },
-
-          getPosts: function() {
-
+              self.statusChangeCallback(response);
+            }.bind(self));
           },
 
           handleClick: function() {
-            FB.login(this.checkLoginState(), {scope: 'user_posts'});
+            console.log("handleClick");
+            FB.login(this.checkLoginState(), {scope: 'user_posts,publish_actions'});
           },
+
           render: function() {
             return (
               <div>
-                { this.state.showLogin ? <a href="#" onClick={this.checkLoginState}>Login</a> : null }
+                { this.state.showLogin ? <a href="#" onClick={this.handleClick}>Login</a> : null }
+                <div><a href="#" onClick={this.postMessage}>Post Voucher</a></div>
               </div>
             )
           }
